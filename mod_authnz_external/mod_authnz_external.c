@@ -674,7 +674,7 @@ static authz_status externalgroup_check_authorization(request_rec *r,
 		r->user, r->uri, code);
 
         // Revisit whether there was an authenticated user so that we can flag Apache appropriately
-        if (user == "") return AUTHZ_DENIED_NO_USER;
+        if (r->user == "") return AUTHZ_DENIED_NO_USER;
 
 	return AUTHZ_DENIED;
 }
