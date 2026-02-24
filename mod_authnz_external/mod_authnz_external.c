@@ -763,7 +763,7 @@ void mock_turtle_cache(request_rec *r, const char *plainpw)
 
 
 /* Password checker for basic authentication - given a login/password,
- * check if it is valid.  Returns one of AUTH_DENIED, AUTH_GRANTED, 
+ * check if it is valid.  Returns one of AUTH_DENIED, AUTH_GRANTED,
  * AUTH_USER_NOT_FOUND, or AUTH_GENERAL_ERROR. */
 
 static authn_status authn_external_check_password(request_rec *r,
@@ -815,7 +815,7 @@ static authn_status authn_external_check_password(request_rec *r,
 			return AUTH_GRANTED;
 		}
 
-		/* code 1 is 
+		/* code 1 is
 		 * STATUS_UNKNOWN
 		 * Nonexistant login or (for some configurations) incorrect password
 		 * Handle this differently so that unknown users can be passed to the next
