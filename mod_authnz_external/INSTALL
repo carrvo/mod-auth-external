@@ -574,6 +574,11 @@ instructions to your server configuration.
     directive. In Apache 2.4, the notion of authoritativeness is
     thankfully almost entirely gone, so this directive is too.
     
+    If you want the ability to specify a return code for your authenticator
+    to indicate that it could not find a user:
+    
+    AuthnUserNotFoundCode <code>
+    
     * OLD DIRECTIVES
 
     Some of the directives mentioned above used to have different names.
