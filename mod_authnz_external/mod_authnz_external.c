@@ -81,7 +81,9 @@ typedef struct
 	char *context;					/* Context string from AuthExternalContext */
 	int  groupsatonce;				/* Check all groups in one call? */
 	int  providecache;				/* Provide auth data to mod_authn_socache? */
-	int  authn_no_user_code;			/* External code to use for no user (HTTP 401) */
+	int  authn_user_not_found_code;			/* External code to use for
+              user not found in this authn module and pass authority on to the next module
+              (if no subsequent module finds a user then the final result will be HTTP 401) */
 	int  authncheck;				/* Check for previous authentication? */
 
 } authnz_external_dir_config_rec;
@@ -117,12 +119,12 @@ static void *create_authnz_external_dir_config(apr_pool_t *p, char *d)
 		apr_palloc(p, sizeof(authnz_external_dir_config_rec));
 
 	dir->auth_name = apr_array_make(p, 2, sizeof(const char *)); /* no default */
-	dir->group_name = NULL;		/* no default */
-	dir->context = NULL;		/* no default */
-	dir->groupsatonce = 1;		/* default to on */
-	dir->providecache = 0;		/* default to off */
-	dir->authn_no_user_code = 0;	/* default to 0 to ignore */
-	dir->authncheck = 1;		/* default to on */
+	dir->group_name = NULL;		        /* no default */
+	dir->context = NULL;		        /* no default */
+	dir->groupsatonce = 1;		        /* default to on */
+	dir->providecache = 0;		        /* default to off */
+	dir->authn_user_not_found_code = 0;	/* default to 0 to ignore */
+	dir->authncheck = 1;		        /* default to on */
 	return dir;
 }
 
@@ -325,10 +327,12 @@ static const command_rec authnz_external_cmds[] =
 
 	AP_INIT_TAKE1("AuthnUserNotFoundCode",
 	ap_set_int_slot,
-	(void *)APR_OFFSETOF(authnz_external_dir_config_rec, authn_no_user_code),
+	(void *)APR_OFFSETOF(authnz_external_dir_config_rec, authn_user_not_found_code),
 	OR_AUTHCFG,
 	"Set to a return code that the authenticator uses to indicate that the "
-		"user is not found (respond with HTTP 401). Set to 0 to ignore."),
+		"user is not found in this module, and to pass authority on "
+		"to the next module (if no subsequent module finds a user then "
+		"the final respond will be HTTP 401). Set to 0 to disable."),
 
 	AP_INIT_FLAG("GroupExternalAuthNCheck",
 	ap_set_flag_slot,
@@ -830,7 +834,7 @@ static authn_status authn_external_check_password(request_rec *r,
 		 *   - incorrect password or other failure (any other code)
 		 * Note that a configuration of 0 will effectively disable this feature
 		 * because it will succeed in the previous step (authentication success) */
-		if (code != dir->authn_no_user_code)
+		if (code != dir->authn_user_not_found_code)
 		{
 			all_not_found = 0;
 		}
