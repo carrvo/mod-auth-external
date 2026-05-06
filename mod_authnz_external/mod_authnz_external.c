@@ -824,10 +824,12 @@ static authn_status authn_external_check_password(request_rec *r,
 			return AUTH_GRANTED;
 		}
 
-		/* Nonexistant login or (for some configurations) incorrect password
-		 * Handle this differently so that unknown users can be passed to the next
-		 * Apache AuthBasicProvider
-		 * Note that a configuration of 0, this will always be true and thus ignored */
+		/* Determine what the return code indicates:
+		 *   - non-existent user in this authenticator (configured code)
+		 *     and gracefully pass authority on to the next external authenticator
+		 *   - incorrect password or other failure (any other code)
+		 * Note that a configuration of 0 will effectively disable this feature
+		 * because it will succeed in the previous step (authentication success) */
 		if (code != dir->authn_no_user_code)
 		{
 			all_not_found = 0;
@@ -840,6 +842,9 @@ static authn_status authn_external_check_password(request_rec *r,
 			extname, extpath, code, r->user);
 	}
 
+        /* If all external authenticators return with non-existent user,
+         * we return AUTH_USER_NOT_FOUND so that we can gracefully
+         * pass authority to the next Apache AuthBasicProvider */
 	if (all_not_found) {
 		return AUTH_USER_NOT_FOUND;
 	}
